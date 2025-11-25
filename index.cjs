@@ -1,36 +1,36 @@
-// index.js
+// index.cjs
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
 
 const app = express();
 const server = http.createServer(app);
-
-// ایجاد WebSocket Server
 const wss = new WebSocket.Server({ server });
 
 // وقتی کسی وصل شد
 wss.on("connection", (ws) => {
+
+  // پیام دریافت شد
   ws.on("message", (msg) => {
     console.log("پیام دریافت شد:", msg);
 
-    // فرستادن پیام برای همه کلاینت‌های وصل شده
+    // ارسال پیام به همه به جز فرستنده
     wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
         client.send(msg);
       }
     });
   });
 
-  // پیام اولیه به کلاینت جدید
+  // پیام خوش‌آمدگویی به فرستنده
   ws.send("اتصال برقرار شد!");
 });
 
-// یک مسیر ساده HTTP برای تست سرور
+// تست سرور با مرورگر
 app.get("/", (req, res) => {
   res.send("WebSocket server is running...");
 });
 
-// پورت Render: process.env.PORT
+// پورت سرور
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
